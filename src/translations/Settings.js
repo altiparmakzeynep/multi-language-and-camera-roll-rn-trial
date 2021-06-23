@@ -4,7 +4,8 @@ const STORAGE_KEY = 'SETTINGS';
 
 const DEFAULT_SETTINGS = {
   name: '',
-  defaultLocale: 'tr'
+  defaultLocale: 'tr',
+  
 };
 
 export const loadSettings = async () => {
