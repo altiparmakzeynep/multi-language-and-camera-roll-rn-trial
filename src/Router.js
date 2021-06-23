@@ -12,6 +12,7 @@ class RouterComp extends Component {
                     <Stack.Screen name = "main" options = {{headerShown: false}} component = {Main}></Stack.Screen>
                 </Stack.Navigator>
             </NavigationContainer>
+            
         )
     }
 }

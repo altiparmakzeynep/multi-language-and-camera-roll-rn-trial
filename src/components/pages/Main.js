@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { View, StyleSheet, Text, I18nManager } from "react-native";
-import { PhoneHeight, PhoneWidth } from "../config/env";
+import { View, StyleSheet, Text, Image, TouchableOpacity, Modal } from "react-native";
+import { PhoneHeight, PhoneWidth, responsiveSize } from "../config/env";
 import i18n from "i18n-js";
 import tr from "../../translations/tr.json";
 import en from "../../translations/en.json";
@@ -10,13 +10,24 @@ import { loadSettings } from '../../translations/Settings';
 
 // i18n.defaultLocale = 'tr';
 // i18n.locale = 'fr';
-i18n.fallbacks = true;
+// i18n.fallbacks = true;
 i18n.translations = { tr, en, fr };
   
-class Main extends Component {
+class Main extends Component {  
     constructor(props) {
         super(props);
+        this.state = {
+            modalVisible: false
+          };
     }
+    setModalVisible = (visible) => {
+        this.setState({ modalVisible: visible });
+      }
+    setLanguage = (lang) => {
+        i18n.locale = lang
+        this.setModalVisible(false)
+    }
+      
     async componentDidMount() {
         const settings = await loadSettings();
         console.log("language: ", i18n.locale);
@@ -26,10 +37,42 @@ class Main extends Component {
           }
     }
     render() {
+        const { modalVisible } = this.state;
         return(
             <View style = {styles.container}>
                 <View style = {styles.textBoard}>
                     <Text style = {styles.text}>{i18n.t('hello')}</Text>
+                    <TouchableOpacity style = {styles.settingsButton} onPress={() => this.setModalVisible(true)}>
+                        <Image 
+                            style = {styles.settingsIcon}
+                            source={require('../../images/translation.png')}/>
+                    </TouchableOpacity>
+                    <Modal
+                        animationType= "slide"
+                        transparent={true}
+                        visible={modalVisible}
+                        onRequestClose={() => {
+                        this.setModalVisible(!modalVisible);
+                        }}>
+                        <View style = {styles.modalContainer}>
+                        <TouchableOpacity
+                                 style = {styles.frButton}
+                                 onPress = {() => this.setLanguage("fr")}>
+                                <Text>French</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                style = {styles.enButton}
+                                onPress = {() => this.setLanguage("en")}>
+                                <Text>English</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                style = {styles.trButton}
+                                onPress = {() => this.setLanguage("tr")}>
+                                <Text>Türkçe</Text>
+                            </TouchableOpacity>
+                            
+                        </View>
+                     </Modal>
                 </View>
             </View>
         )
@@ -60,5 +103,29 @@ const styles = StyleSheet.create({
         shadowRadius: 12,
         elevation: 9,
     },
+    text: {
+        fontSize: responsiveSize(13)
+    },
+    settingsButton: {
+        borderWidth: 0,
+        marginTop: PhoneHeight * 0.03,
+        resizeMode: "contain"
+        // width: PhoneWidth * 0.1,
+        // height: PhoneHeight * 0.05,
+    },
+    settingsIcon: {
+        width: responsiveSize(30),
+        height: responsiveSize(30)
+    },
+    modalContainer: {
+        backgroundColor: "pink",
+        width: PhoneWidth * 0.3,
+        height: PhoneHeight * 0.1,
+        alignSelf: "center",
+        marginTop: PhoneHeight * 0.55,
+        borderRadius: 12,
+        alignItems: "center",
+        justifyContent: "center",
+    }
 })
 export default Main;
