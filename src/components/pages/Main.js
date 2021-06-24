@@ -8,6 +8,10 @@ import fr from "../../translations/fr.json";
 import { loadSettings } from '../../translations/Settings';
 import { launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import CameraRoll from "@react-native-community/cameraroll";
+import { FlatList } from "react-native-gesture-handler";
+import PhotosRenderItem from "../../helpers/PhotosRenderItem";
+import { getPhotosFromCamereRoll } from "../../actions/MainAction";
+import {connect} from 'react-redux';
 
 class Main extends Component { 
      
@@ -16,13 +20,16 @@ class Main extends Component {
         this.state = {
             modalVisible: false,
             imageUri: " ",
-            photos: []
           };
     }
     
     setModalVisible = (visible) => {
         this.setState({ modalVisible: visible });
-      }
+        console.log("modala girdi");
+        this.getPhotosByAlbum();
+
+    }
+    
     setLanguage = (lang) => {
         i18n.locale = lang
         this.setModalVisible(false)
@@ -65,22 +72,23 @@ class Main extends Component {
               }
            }))
     }
+    getPhotosByAlbum = () => {
+        CameraRoll.getPhotos({
+            first: 9,
+            assetType: "Photos",
+        }).then(r => {
+        //  this.setState({ photos: r.edges });
+        console.log("zz: ", r.edges);
+        this.props.getPhotosFromCamereRoll(r.edges) 
+       })
+ 
+     }
     // getAlbums = () => {
     //     const result = CameraRoll.getAlbums({ assetType:"Photos" })
     //     this.setState({ albumList:result })
     //     console.log("fotolarrrrrr", result);
     // }
-    getPhotosByAlbum = () => {
-       CameraRoll.getPhotos({
-           first: 10,
-           assetType: "Photos",
-       }).then(r => {
-        this.setState({ photos: r.edges });
-        console.log("allah aşkına sonuç", r.edges);
-
-      })
-
-    }
+   
     async componentDidMount() {
         const settings = await loadSettings();
         console.log("language: ", i18n.defaultLocale);
@@ -88,27 +96,16 @@ class Main extends Component {
             i18n.locale = settings.locale;
             this.props.navigation.navigate('main');
           }
-    }
+    } 
     render() {
+        console.log("maindeki camera roll:", this.props.cameraRoll);
         i18n.translations = { tr, en, fr };
         const { modalVisible } = this.state;
         return(
             <View style = {styles.container}>
-                <View style = {styles.imageContainer}>
+                {/* <View style = {styles.imageContainer}>
                     <Image source = {{uri: this.state.imageUri}} style = {styles.img}></Image>
-                    {this.state.photos.map((p, i) => {
-                        return (
-                            <Image
-                            key={i}
-                            style={{
-                                width: responsiveSize(200),
-                                height: responsiveSize(200),
-                            }}
-                            source={{ uri: p.node.image.uri }}
-                            />
-                        );
-                    })}
-                </View>
+                </View> */}
                 <View style = {styles.textBoard}>
                     <Text style = {styles.text}>{i18n.t('hello')}</Text>
                     <View style = {styles.buttonsContainer}>
@@ -127,13 +124,15 @@ class Main extends Component {
                                 style = {styles.cameraIcon}
                                 source = {require('../../images/gallery.png')}/>
                         </TouchableOpacity>
-                        <TouchableOpacity style = {styles.cameraButton} onPress = {this.getPhotosByAlbum}>
+                        <TouchableOpacity style = {styles.cameraButton} onPress = {() => {this.setModalVisible(true)}}>
                             <Image 
                                 style = {styles.cameraIcon}
                                 source = {require('../../images/folder.png')}/>
                         </TouchableOpacity>
                     </View>
-                    <Modal
+                    
+                    {/* language's modal */}
+                    {/* <Modal
                         animationType = "slide"
                         transparent = {true}
                         visible = {modalVisible}
@@ -157,7 +156,24 @@ class Main extends Component {
                             <Text>Türkçe</Text>
                         </TouchableOpacity>      
                         </View>
+                     </Modal> */}
+
+                     <Modal  
+                        animationType = "slide"
+                        transparent = {true}
+                        visible = {modalVisible}
+                        onRequestClose = {() => {
+                        this.setModalVisible(!modalVisible);
+                        }}>  
+                        <View style = {styles.photosModalContainer}>
+                        <FlatList
+                            numColumns = {3}
+                            data = {this.props.cameraRoll}
+                            renderItem = {({item}) => <PhotosRenderItem item= {item}/> }
+                            keyExtractor={item => item.id}/>
+                        </View> 
                      </Modal>
+                
                 </View>
             </View>
         )
@@ -229,10 +245,29 @@ const styles = StyleSheet.create({
         width: PhoneWidth * 0.3,
         height: PhoneHeight * 0.1,
         alignSelf: "center",
-        marginTop: PhoneHeight * 0.55,
+        marginTop: PhoneHeight * 0.22,
         borderRadius: 12,
         alignItems: "center",
         justifyContent: "center",
+    },
+    photosModalContainer: {
+        backgroundColor: "white",
+        width: PhoneWidth,
+        height: PhoneHeight * 0.6,
+        alignSelf: "center",
+        marginTop: PhoneHeight * 0.4,
+       
     }
 })
-export default Main;
+const mapStateToProps = state => {
+    const { cameraRoll } = state.MainReducer;
+    return {
+      cameraRoll
+    }
+  }
+export default connect(
+    mapStateToProps,
+    {
+        getPhotosFromCamereRoll
+    }
+  )(Main)
