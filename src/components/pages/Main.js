@@ -1,20 +1,19 @@
 import React, { Component } from "react";
-import { View, StyleSheet, Text, Image, TouchableOpacity, Modal, ScrollView } from "react-native";
+import { View, StyleSheet, Text, Image, TouchableOpacity, Modal } from "react-native";
 import { PhoneHeight, PhoneWidth, responsiveSize } from "../config/env";
-import i18n from "i18n-js";
+import i18n, { translate } from "i18n-js";
 import tr from "../../translations/tr.json";
 import en from "../../translations/en.json";
 import fr from "../../translations/fr.json";
 import { loadSettings } from '../../translations/Settings';
-import { launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import CameraRoll from "@react-native-community/cameraroll";
 import { FlatList } from "react-native-gesture-handler";
 import PhotosRenderItem from "../../helpers/PhotosRenderItem";
-import { getPhotosFromCamereRoll } from "../../actions/MainAction";
+import { getPhotosFromCamereRoll} from "../../actions/MainAction";
 import {connect} from 'react-redux';
 
 class Main extends Component { 
-     
     constructor(props) {
         super(props);
         this.state = {
@@ -22,90 +21,74 @@ class Main extends Component {
             imageUri: " ",
           };
     }
-    
     setModalVisible = (visible) => {
         this.setState({ modalVisible: visible });
-        console.log("modala girdi");
         this.getPhotosByAlbum();
-
     }
-    
     setLanguage = (lang) => {
         i18n.locale = lang
         this.setModalVisible(false)
     }
     setImageUri = (data) => {
-        this.setState({imageUri:data})
+        this.setState({ imageUri:data })
     }
     openCamera = () => {
         const options = {
-         storageOptions: {
-            path: "images",
-            mediaType: "photo"
-        },
-         includeBase64: true
+            storageOptions: {
+                path: "images",
+                mediaType: "photo"
+            },
+            includeBase64: true
         };
         launchCamera(options, (response => {
             if(response.error) {
                 console.log("Camera Error: ", response.error);
             } 
             else {
-                console.log("image???????:", response);
                 this.setState({imageUri:response.assets[0].uri});
             }
         }));
-     };
+    };
     openGallery = () => {
         const options = {
             storageOptions: {
                path: "images",
                mediaType: "photo"
-           },
+            },
             includeBase64: true
-           };
-           launchImageLibrary(options, (response => {
+        };
+        launchImageLibrary(options, (response => {
             if (response.error) {
-                console.log('LaunchImageLibrary Error: ', response.error);
-              }
-              else {
+                console.log('LaunchImageLibrary Error: ', response.error);               
+            }
+            else {
                 this.setState({imageUri:response.assets[0].uri});
-              }
-           }))
+            }
+        }))
     }
     getPhotosByAlbum = () => {
         CameraRoll.getPhotos({
-            first: 9,
+            first: 1000,
             assetType: "Photos",
         }).then(r => {
-        //  this.setState({ photos: r.edges });
         console.log("zz: ", r.edges);
         this.props.getPhotosFromCamereRoll(r.edges) 
        })
- 
-     }
-    // getAlbums = () => {
-    //     const result = CameraRoll.getAlbums({ assetType:"Photos" })
-    //     this.setState({ albumList:result })
-    //     console.log("fotolarrrrrr", result);
-    // }
-   
+    }
     async componentDidMount() {
+        translate.cache.clear();
         const settings = await loadSettings();
         console.log("language: ", i18n.defaultLocale);
         if (settings !== null) {
             i18n.locale = settings.locale;
             this.props.navigation.navigate('main');
-          }
+        }
     } 
     render() {
-        console.log("maindeki camera roll:", this.props.cameraRoll);
         i18n.translations = { tr, en, fr };
         const { modalVisible } = this.state;
         return(
             <View style = {styles.container}>
-                {/* <View style = {styles.imageContainer}>
-                    <Image source = {{uri: this.state.imageUri}} style = {styles.img}></Image>
-                </View> */}
                 <View style = {styles.textBoard}>
                     <Text style = {styles.text}>{i18n.t('hello')}</Text>
                     <View style = {styles.buttonsContainer}>
@@ -158,7 +141,7 @@ class Main extends Component {
                         </View>
                      </Modal> */}
 
-                     <Modal  
+                    <Modal  
                         animationType = "slide"
                         transparent = {true}
                         visible = {modalVisible}
@@ -166,14 +149,21 @@ class Main extends Component {
                         this.setModalVisible(!modalVisible);
                         }}>  
                         <View style = {styles.photosModalContainer}>
-                        <FlatList
-                            numColumns = {3}
-                            data = {this.props.cameraRoll}
-                            renderItem = {({item}) => <PhotosRenderItem item= {item}/> }
-                            keyExtractor={item => item.id}/>
+                            <View style = {styles.modalsOptionsContainer}>
+                                <TouchableOpacity style = {styles.saveButton}>
+                                    <Text>Save</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style = {styles.closeButton} onPress = {() => {this.setModalVisible(false)}}>
+                                    <Text>Close</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <FlatList
+                                numColumns = {3}
+                                data = {this.props.cameraRoll}
+                                renderItem = {({item}) => <PhotosRenderItem item= {item}/> }
+                                keyExtractor={item => item.id}/>
                         </View> 
-                     </Modal>
-                
+                    </Modal>              
                 </View>
             </View>
         )
@@ -203,17 +193,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.32,
         shadowRadius: 12,
         elevation: 9,
-    },
-    imageContainer: {
-        borderWidth: 1,
-        // width: responsiveSize(100),
-        // height: responsiveSize(100),
-        marginTop: PhoneHeight * 0.2,
-        // borderRadius: 100
-    },
-    img: {
-        width: responsiveSize(200),
-        height: responsiveSize(200),
     },
     text: {
         fontSize: responsiveSize(13)
@@ -252,22 +231,48 @@ const styles = StyleSheet.create({
     },
     photosModalContainer: {
         backgroundColor: "white",
+        borderTopLeftRadius: 12,
+        borderTopRightRadius: 12,
         width: PhoneWidth,
         height: PhoneHeight * 0.6,
         alignSelf: "center",
         marginTop: PhoneHeight * 0.4,
-       
+    },
+    modalsOptionsContainer: {
+        borderWidth: 0,
+        height: PhoneHeight * 0.05,
+        backgroundColor: "white",
+        borderTopLeftRadius: 12,
+        borderTopRightRadius: 12,
+    },
+    saveButton: {
+        borderTopRightRadius: 12,
+        width: PhoneWidth * 0.15,
+        height: PhoneHeight * 0.05,
+        alignItems: "center",
+        justifyContent: "center",
+        alignSelf: "flex-end"
+    },
+    closeButton: {
+        position: "absolute",
+        borderTopLeftRadius: 12,
+        width: PhoneWidth * 0.15,
+        height: PhoneHeight * 0.05,
+        alignItems: "center",
+        justifyContent: "center",
     }
 })
 const mapStateToProps = state => {
-    const { cameraRoll } = state.MainReducer;
+    const { cameraRoll, selectedPhotos } = state.MainReducer;
     return {
-      cameraRoll
+      cameraRoll,
+      selectedPhotos
     }
   }
 export default connect(
     mapStateToProps,
     {
-        getPhotosFromCamereRoll
+      getPhotosFromCamereRoll,
+      
     }
   )(Main)

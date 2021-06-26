@@ -16,13 +16,10 @@ const persistConfig = {
 const MainReducer = (state = INITIAL_STATE, action) => {
     switch (action.type) {
         case GET_PHOTOS:
-            // console.log("reducerdaki photo: ", state.cameraRoll);
-            console.log(`action.payload`, action.payload)
             return {
                 ...state,
                 cameraRoll: action.payload
             }
-            
         default:
             return state;
     }
