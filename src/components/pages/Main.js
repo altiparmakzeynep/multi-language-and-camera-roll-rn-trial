@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, StyleSheet, Text, Image, TouchableOpacity, Modal } from "react-native";
+import { View, StyleSheet, Text, Image, TouchableOpacity, Modal, ScrollView } from "react-native";
 import { PhoneHeight, PhoneWidth, responsiveSize } from "../config/env";
 import i18n, { translate } from "i18n-js";
 import tr from "../../translations/tr.json";
@@ -10,8 +10,7 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import CameraRoll from "@react-native-community/cameraroll";
 import { FlatList } from "react-native-gesture-handler";
 import PhotosRenderItem from "../../helpers/PhotosRenderItem";
-import UploadedPhotosRenderItem from "../../helpers/UploadedPhotosRenderItem";
-import { getPhotosFromCamereRoll} from "../../actions/MainAction";
+import { getPhotosFromCamereRoll, uploadPhotos } from "../../actions/MainAction";
 import {connect} from 'react-redux';
 
 class Main extends Component { 
@@ -76,12 +75,24 @@ class Main extends Component {
         this.props.getPhotosFromCamereRoll(r.edges) 
        })
     }
-    deneme = () => {
-        <FlatList
-            numColumns = {3}
-            data = {this.props.selectedPhotos}
-            renderItem = {({item}) => <UploadedPhotosRenderItem item= {item}/> }
-            keyExtractor={item => item.id}/>  
+    closePhotosModal = (value) => {
+        this.setState({ modalVisible:false });
+    
+        value.map((item) => {
+            let localUri =  item.node.image.uri;
+            console.log("local uri : ", localUri);
+            var photo = {
+                media_url: localUri,
+                title: "image/jpeg",
+                description: "photo.jpg"
+            }
+            let formData = new FormData();
+            formData.append('key', photo)
+            this.props.uploadPhotos(formData)
+        })
+
+        
+      
     }
     async componentDidMount() {
         translate.cache.clear();
@@ -93,7 +104,6 @@ class Main extends Component {
         }
     } 
     render() {
-        console.log("seçilen fotolar ", this.props.selectedPhotos);
         i18n.translations = { tr, en, fr };
         const { modalVisible } = this.state;
         return(
@@ -159,7 +169,7 @@ class Main extends Component {
                         }}>  
                         <View style = {styles.photosModalContainer}>
                             <View style = {styles.modalsOptionsContainer}>
-                                <TouchableOpacity style = {styles.saveButton} onPress = {this.deneme}>
+                                <TouchableOpacity style = {styles.saveButton} onPress = {() => this.closePhotosModal(this.props.selectedPhotos)}>
                                     <Text>Save</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style = {styles.closeButton} onPress = {() => {this.setModalVisible(false)}}>
@@ -174,10 +184,9 @@ class Main extends Component {
                         </View> 
                     </Modal>              
                 </View>
-                <View style = {styles.uploadedPhotosContainer}>
-                    
-                </View>
+                {/* <View style = {styles.uploadedPhotosContainer}>
                 
+                </View> */}
             </View>
         )
     }
@@ -279,7 +288,11 @@ const styles = StyleSheet.create({
         width: PhoneWidth * 0.75,
         height: PhoneHeight * 0.2,
         marginTop: PhoneHeight * 0.05,
-        flexDirection: "row",
+        flexDirection: "row"
+    },
+    uploadedPhotos: {
+        width: (PhoneWidth * 0.75) / 2,
+        height: PhoneHeight * 0.1
     }
 })
 const mapStateToProps = state => {
@@ -293,6 +306,6 @@ export default connect(
     mapStateToProps,
     {
       getPhotosFromCamereRoll,
-      
+      uploadPhotos
     }
   )(Main)

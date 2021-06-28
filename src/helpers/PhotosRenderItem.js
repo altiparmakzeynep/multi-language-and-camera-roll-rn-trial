@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { ScrollView, View, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { PhoneHeight, PhoneWidth, responsiveSize } from "../components/config/env";
-import { getPhotos, selectPhotos} from "../actions/MainAction";
+import { PhoneWidth, responsiveSize } from "../components/config/env";
+import { selectPhotos} from "../actions/MainAction";
 import {connect} from 'react-redux';
 
 class PhotosRenderItem extends Component {
@@ -16,15 +16,16 @@ class PhotosRenderItem extends Component {
             <View>
               <ScrollView>
                 <View style = {styles.checkContainer}>
-                { item.selectedItem !== true ? <Image
-                    style={{
-                      width: responsiveSize(25),
-                      height: responsiveSize(25) }} 
-                      source={require('../images/circle.png')}/> :
-                       <Image style={{
+                  { item.selectedItem !== true ? 
+                    <Image
+                        style={{
                         width: responsiveSize(25),
                         height: responsiveSize(25) }} 
-                        source={require('../images/check.png')} ></Image>}
+                        source={require('../images/circle.png')}/> :
+                    <Image style={{
+                        width: responsiveSize(25),
+                        height: responsiveSize(25) }} 
+                        source={require('../images/check.png')}/>}
                 </View>
                 <TouchableOpacity onPress = {( ) => this.props.selectPhotos(item)}>
                 <Image
@@ -35,7 +36,6 @@ class PhotosRenderItem extends Component {
                 </TouchableOpacity>             
               </ScrollView>                 
             </View>
-
         )
     }
 }
@@ -57,7 +57,6 @@ const mapStateToProps = state => {
 export default connect(
     mapStateToProps,
     {
-      getPhotos,
       selectPhotos
     }
   )(PhotosRenderItem)

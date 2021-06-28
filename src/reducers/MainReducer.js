@@ -2,13 +2,13 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { persistReducer } from 'redux-persist';
 import {
     GET_PHOTOS,
-    SELECT_PHOTOS
+    SELECT_PHOTOS,
+    UPLOAD_PHOTOS
 } from "../actions/MainAction"
 
 const INITIAL_STATE = {
     cameraRoll: [],
     selectedPhotos: [],
-
 }
 const persistConfig = {
     key: 'root',
@@ -23,13 +23,11 @@ const MainReducer = (state = INITIAL_STATE, action) => {
                 item.id = Math.random()
                 item.selectedItem = false
             })
-            console.log("idli hali", action.payload);
             return {
                 ...state,
                 cameraRoll: action.payload
             }
         case SELECT_PHOTOS:
-            console.log("action ",action.payload);
             state.cameraRoll.map((item) => {
                 if(item.id == action.payload.id && item.selectedItem === false){
                     item.selectedItem = true
@@ -38,14 +36,16 @@ const MainReducer = (state = INITIAL_STATE, action) => {
                 else if(item.id == action.payload.id && item.selectedItem === true){
                     item.selectedItem = false
                     let index = action.payload.id
-                    state.selectedPhotos.splice(item, 1)
+                    state.selectedPhotos.splice(index, 1)
                 }
             })
-            console.log("?????", state.selectedPhotos);
             return {
                 ...state,
                 cameraRoll: [...state.cameraRoll],
-                // selectedPhotos: action.payload
+            }
+        case UPLOAD_PHOTOS:
+            return {
+                ...state,
             }
         default:
             return state;
