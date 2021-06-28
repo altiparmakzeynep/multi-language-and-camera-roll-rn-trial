@@ -1,25 +1,14 @@
 import React, { Component } from "react";
 import { ScrollView, View, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { PhoneHeight, PhoneWidth, responsiveSize } from "../components/config/env";
-import { getPhotos} from "../actions/MainAction";
+import { getPhotos, selectPhotos} from "../actions/MainAction";
 import {connect} from 'react-redux';
 
 class PhotosRenderItem extends Component {
     constructor(props){
         super(props);
         this.state = {
-            selectedPhoto: false,
           };
-    }
-    
-    selectPhotos = (item) => {
-      console.log("array: ", this.state.photosArray);
-      if(this.state.selectedPhoto === false){
-        this.setState({ selectedPhoto:true })    
-      }
-      else{
-        this.setState({ selectedPhoto:false })
-      }
     }
     render() {
         const { item } = this.props;
@@ -27,7 +16,7 @@ class PhotosRenderItem extends Component {
             <View>
               <ScrollView>
                 <View style = {styles.checkContainer}>
-                { this.state.selectedPhoto !== true ? <Image
+                { item.selectedItem !== true ? <Image
                     style={{
                       width: responsiveSize(25),
                       height: responsiveSize(25) }} 
@@ -37,7 +26,7 @@ class PhotosRenderItem extends Component {
                         height: responsiveSize(25) }} 
                         source={require('../images/check.png')} ></Image>}
                 </View>
-                <TouchableOpacity onPress = {( ) => this.selectPhotos(item)}>
+                <TouchableOpacity onPress = {( ) => this.props.selectPhotos(item)}>
                 <Image
                     style={{
                     width: PhoneWidth / 3,
@@ -59,14 +48,16 @@ const styles = StyleSheet.create({
   }
 })
 const mapStateToProps = state => {
-    const { cameraRoll } = state.MainReducer;
+    const { cameraRoll, selectedPhotos } = state.MainReducer;
     return {
-      cameraRoll
+      cameraRoll,
+      selectedPhotos
     }
   }
 export default connect(
     mapStateToProps,
     {
-      getPhotos
+      getPhotos,
+      selectPhotos
     }
   )(PhotosRenderItem)

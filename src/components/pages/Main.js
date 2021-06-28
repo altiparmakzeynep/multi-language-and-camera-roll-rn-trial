@@ -10,6 +10,7 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import CameraRoll from "@react-native-community/cameraroll";
 import { FlatList } from "react-native-gesture-handler";
 import PhotosRenderItem from "../../helpers/PhotosRenderItem";
+import UploadedPhotosRenderItem from "../../helpers/UploadedPhotosRenderItem";
 import { getPhotosFromCamereRoll} from "../../actions/MainAction";
 import {connect} from 'react-redux';
 
@@ -75,6 +76,13 @@ class Main extends Component {
         this.props.getPhotosFromCamereRoll(r.edges) 
        })
     }
+    deneme = () => {
+        <FlatList
+            numColumns = {3}
+            data = {this.props.selectedPhotos}
+            renderItem = {({item}) => <UploadedPhotosRenderItem item= {item}/> }
+            keyExtractor={item => item.id}/>  
+    }
     async componentDidMount() {
         translate.cache.clear();
         const settings = await loadSettings();
@@ -85,6 +93,7 @@ class Main extends Component {
         }
     } 
     render() {
+        console.log("seçilen fotolar ", this.props.selectedPhotos);
         i18n.translations = { tr, en, fr };
         const { modalVisible } = this.state;
         return(
@@ -150,7 +159,7 @@ class Main extends Component {
                         }}>  
                         <View style = {styles.photosModalContainer}>
                             <View style = {styles.modalsOptionsContainer}>
-                                <TouchableOpacity style = {styles.saveButton}>
+                                <TouchableOpacity style = {styles.saveButton} onPress = {this.deneme}>
                                     <Text>Save</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style = {styles.closeButton} onPress = {() => {this.setModalVisible(false)}}>
@@ -165,6 +174,10 @@ class Main extends Component {
                         </View> 
                     </Modal>              
                 </View>
+                <View style = {styles.uploadedPhotosContainer}>
+                    
+                </View>
+                
             </View>
         )
     }
@@ -260,6 +273,13 @@ const styles = StyleSheet.create({
         height: PhoneHeight * 0.05,
         alignItems: "center",
         justifyContent: "center",
+    },
+    uploadedPhotosContainer: {
+        borderWidth: 1,
+        width: PhoneWidth * 0.75,
+        height: PhoneHeight * 0.2,
+        marginTop: PhoneHeight * 0.05,
+        flexDirection: "row",
     }
 })
 const mapStateToProps = state => {
