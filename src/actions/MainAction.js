@@ -21,15 +21,17 @@ export const uploadPhotos = (formData) => {
         dispatch({
             type: UPLOAD_PHOTOS 
         })
-        console.log(formData);
+        console.log("data:" ,formData);
         axios({
             method: "POST",
             url: "http://192.168.1.6:5003/api/v1/posts",
             data: formData,
             headers: {
-                'Authorization': "Bearer  "  +  "D3UEv58RQ2KN89cpa6Q9kyxmctD3rlCD7nHQ5DwrGpENscSzUgH8lTLQ5I3pLBFgrF2iCJPxxgkBUh5KZBSq62aXmRSLtpSas2QfQPx4oMV1heagVImVoPbkTFMrRXtitI691TxBQ1UWxVnWqsfwPwrLIz4Vra5EiaFskJBlpy3cTtIFSeiMRTZyO8g1Z34PcW8iB6ZaWRPvaERBnFwfiTUm1uz7Cdv5FUL0uKO8hU5SbvzmlgoLwpLdpW",
+                'Content-Type': 'multipart/form-data;',
+                'Authorization': 'Bearer ' +  '0XgxIuXhEgHtpGqVPRC8HQpe4VIib3uTXOREPeqnBZLJnV4Zm4TTVTXvSgp0AQJpI9oJZcBnCb0TlHqtOR1AeDoNXaNnS4xOXuwoxXT9a9GPcki4M2OWs5PX0bvJesENUBethNxzaZr7m2rFnRAQMHfyIxq4XhS7wfIKKEAkiq1CIzOrT9RSKrmS4oHuTCQ3nJypKwwKrQ5cRcTJipi8KBa53PcwZoZkgKOxqf7Q3K8rufD6Ten89k1yIf',
             }           
         }).then((result) => {
+            console.log("ddd", result);
             if(result.data.status == "success"){
                 dispatch({
                     payload: result.data.data

@@ -82,12 +82,15 @@ class Main extends Component {
             let localUri =  item.node.image.uri;
             console.log("local uri : ", localUri);
             var photo = {
-                media_url: localUri,
-                title: "image/jpeg",
-                description: "photo.jpg"
+                uri: localUri,
+                type: "image/jpeg",
+                name: "photo.jpg"
             }
             let formData = new FormData();
-            formData.append('key', photo)
+            formData.append('media_url', photo)
+            formData.append('title', "sdjkfhsdklf")
+            formData.append('user_id', 2)
+            formData.append('description', "sdjlfksdlfkjsdlfkj")
             this.props.uploadPhotos(formData)
         })
 
